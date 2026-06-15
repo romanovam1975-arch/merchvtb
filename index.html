@@ -275,11 +275,14 @@ async function doLogin(){
 }
 
 function buildReel(){
-  const t=document.getElementById("reel-track");t.innerHTML="";
-  for(let i=0;i<40;i++){
-    const m=MERCH[i%MERCH.length];
-    const d=document.createElement("div");d.className="reel-item";
-    d.innerHTML=`<img src="${m.img}" alt="${m.name}">`;
+  const t = document.getElementById("reel-track");
+  t.innerHTML = "";
+  // Создаём стартовый набор элементов (чуть больше, чтобы заполнить экран)
+  for (let i = 0; i < 20; i++) {
+    const m = MERCH[i % MERCH.length];
+    const d = document.createElement("div");
+    d.className = "reel-item";
+    d.innerHTML = `<img src="${m.img}" alt="${m.name}">`;
     t.appendChild(d);
   }
 }
@@ -307,29 +310,71 @@ function initSpin(){
   document.getElementById("btn-spin").disabled=false;setLabel("крутить!");
 }
 
-function doSpin(){
-  if(spinning||used>=MAX)return;
-  spinning=true;document.getElementById("btn-spin").disabled=true;
-  const total=40,rounds=5+Math.floor(Math.random()*3),target=Math.floor(Math.random()*total);
-  const scroll=rounds*total+target,dur=2.6+rounds*0.11;
-  posReel(0,false,0);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>posReel(scroll,true,dur)));
-  setTimeout(()=>{
-    const ri=((target%MERCH.length)+MERCH.length)%MERCH.length;
-    const item=MERCH[ri];
-    if(won.some(w=>w.name===item.name)){
-      toast("Такой мерч уже есть! Крути ещё раз 🔄",3000);
-      spinning=false;
-      setTimeout(()=>{buildReel();posReel(0,false,0)},300);
-      document.getElementById("btn-spin").disabled=false;return;
-    }
-    used++;won.push(item);updateUI();
-    toast(`🎉 ${item.name}!`);
-    if(used>=MAX){setLabel("Сохраняем...");setTimeout(finish,1000)}
-    else{spinning=false;document.getElementById("btn-spin").disabled=false;setLabel("крутить ещё!")}
-  },dur*1000+120);
-}
+function doSpin() {
+  if (spinning || used >= MAX) return;
+  spinning = true;
+  document.getElementById("btn-spin").disabled = true;
 
+  // 1. Сбрасываем трек в начальное положение БЕЗ анимации
+  posReel(0, false, 0);
+
+  // 2. Рассчитываем параметры вращения
+  const itemsInCycle = MERCH.length; // 4
+  const rounds = 6 + Math.floor(Math.random() * 4); // от 6 до 9 полных кругов
+  const targetIdx = Math.floor(Math.random() * itemsInCycle); // индекс выигрышного мерча (0-3)
+  
+  // Итоговый индекс элемента, к которому нужно прикрутить
+  const scrollTo = (rounds * itemsInCycle) + targetIdx;
+  const dur = 3.5; // Сделаем прокрутку чуть более плавной и солидной
+
+  // 3. Динамически пересобираем трек нужной длины, чтобы картинки не кончались
+  const t = document.getElementById("reel-track");
+  t.innerHTML = "";
+  // Заполняем трек с запасом (+5 элементов после точки остановки)
+  for (let i = 0; i <= scrollTo + 5; i++) {
+    const m = MERCH[i % itemsInCycle];
+    const d = document.createElement("div");
+    d.className = "reel-item";
+    d.innerHTML = `<img src="${m.img}" alt="${m.name}">`;
+    t.appendChild(d);
+  }
+
+  // 4. Запускаем анимацию на следующем кадре анимации, чтобы браузер успел применить сброс (0)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      posReel(scrollTo, true, dur);
+    });
+  });
+
+  // 5. Обработка результатов по окончании анимации
+  setTimeout(() => {
+    const item = MERCH[targetIdx];
+
+    // Проверка на дубликат мерча
+    if (won.some(w => w.name === item.name)) {
+      toast("Такой мерч уже есть! Крути ещё раз 🔄", 3000);
+      spinning = false;
+      document.getElementById("btn-spin").disabled = false;
+      // Мягко возвращаем на старт для повторного круга
+      posReel(0, false, 0);
+      return;
+    }
+
+    used++;
+    won.push(item);
+    updateUI();
+    toast(`🎉 ${item.name}!`);
+
+    if (used >= MAX) {
+      setLabel("Сохраняем...");
+      setTimeout(finish, 1000);
+    } else {
+      spinning = false;
+      document.getElementById("btn-spin").disabled = false;
+      setLabel("крутить ещё!");
+    }
+  }, dur * 1000 + 100);
+}
 async function finish(){
   try{
     await sbInsert({name:user.name,seat:user.seat,merch_1:won[0]?.name||null,merch_2:won[1]?.name||null});
