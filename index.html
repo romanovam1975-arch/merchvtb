@@ -142,15 +142,16 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
 
 /* ══ STAR BURST ══ */
 .star-particle{
-  position:fixed;width:28px;height:28px;
+  position:fixed;width:56px;height:56px;
   background-image:url("assets/starr.png");
   background-size:contain;background-repeat:no-repeat;
   pointer-events:none;z-index:9999;
-  animation:starFly .7s ease-out forwards;
+  animation:starFly 1.1s ease-in forwards;
 }
 @keyframes starFly{
   0%  {transform:translate(0,0) scale(1) rotate(0deg);opacity:1}
-  100%{transform:translate(var(--dx),var(--dy)) scale(.3) rotate(var(--rot));opacity:0}
+  60% {opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(.6) rotate(var(--rot));opacity:0}
 }
 </style>
 </head>
@@ -331,21 +332,23 @@ function initSpin(){
 function burstStars(btn){
   const r=btn.getBoundingClientRect();
   const cx=r.left+r.width/2, cy=r.top+r.height/2;
-  const count=10;
+  const count=5;
   for(let i=0;i<count;i++){
     const el=document.createElement("div");
     el.className="star-particle";
-    const angle=(360/count)*i+Math.random()*20-10;
-    const dist=80+Math.random()*60;
+    const angle=-120+Math.random()*60+(i*(240/(count-1)));
+    const dist=120+Math.random()*80;
     const rad=angle*Math.PI/180;
-    el.style.left=(cx-14)+"px";
-    el.style.top=(cy-14)+"px";
+    const screenH=window.innerHeight;
+    const fallExtra=screenH-(cy+dist*Math.sin(rad));
+    el.style.left=(cx-28)+"px";
+    el.style.top=(cy-28)+"px";
     el.style.setProperty("--dx",(Math.cos(rad)*dist)+"px");
-    el.style.setProperty("--dy",(Math.sin(rad)*dist)+"px");
-    el.style.setProperty("--rot",(Math.random()*360)+"deg");
-    el.style.animationDelay=(Math.random()*0.1)+"s";
+    el.style.setProperty("--dy",(dist*Math.sin(rad)+fallExtra+80)+"px");
+    el.style.setProperty("--rot",(Math.random()*540-270)+"deg");
+    el.style.animationDelay=(i*0.06)+"s";
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(),900);
+    setTimeout(()=>el.remove(),1300);
   }
 }
 
