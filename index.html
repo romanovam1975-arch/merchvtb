@@ -241,9 +241,7 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://ntgpmfzoiikfcuirsnsc.supabase.co';   // ← сюда
-const SUPABASE_KEY = 'sb_publishable_jFf4h8d-8V6Ta0omGQEwLw_hCABEdC9';   
-const TABLE = 'results';
+const SCRIPT_URL = 'ВСТАВЬ_СЮДА_URL_APPS_SCRIPT';  // ← сюда URL задеплоенного Apps Script
 
 const MERCH=[
   {name:"Маска для сна", img:"assets/mask.png"},
@@ -255,25 +253,20 @@ const MAX=2, ITEM_H=240;
 let user=null,spinning=false,won=[],used=0;
 
 async function sbCheck(n,s){
-  const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?name=eq.${encodeURIComponent(n)}&seat=eq.${encodeURIComponent(s)}&select=id`,
-    {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
-  return(await r.json()).length>0;
+  const r=await fetch(`${SCRIPT_URL}?action=check&name=${encodeURIComponent(n)}&seat=${encodeURIComponent(s)}`);
+  const d=await r.json();
+  return d.exists;
 }
 async function sbInsert(row){
-  const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`,{
-    method:"POST",
-    headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},
-    body:JSON.stringify(row)});
-  if(!r.ok)throw new Error(await r.text());
+  const r=await fetch(`${SCRIPT_URL}?action=insert&name=${encodeURIComponent(row.name)}&seat=${encodeURIComponent(row.seat)}&merch_1=${encodeURIComponent(row.merch_1||'')}&merch_2=${encodeURIComponent(row.merch_2||'')}`);
+  if(!r.ok)throw new Error('insert failed');
 }
 async function sbAll(){
-  const r=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=created_at.desc`,
-    {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+  const r=await fetch(`${SCRIPT_URL}?action=all`);
   return r.json();
 }
 async function sbDel(){
-  await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?id=neq.00000000-0000-0000-0000-000000000000`,
-    {method:"DELETE",headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+  await fetch(`${SCRIPT_URL}?action=deleteAll`);
 }
 
 function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0)}
@@ -289,7 +282,7 @@ async function doLogin(){
   btn.disabled=true;btn.textContent="Проверяем...";
   try{
     if(await sbCheck(name,seat)){setErr("Этот участник уже прошёл розыгрыш.");btn.disabled=false;btn.textContent="получить штуки";return}
-  }catch(e){setErr("Ошибка соединения. Проверь ключи Supabase.");btn.disabled=false;btn.textContent="получить штуки";return}
+  }catch(e){setErr("Ошибка соединения. Проверь интернет.");btn.disabled=false;btn.textContent="получить штуки";return}
   user={name,seat};won=[];used=0;
   btn.disabled=false;btn.textContent="получить штуки";
   initSpin();show("screen-spin");
