@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Розыгрыш мерча</title>
 <style>
 @font-face {
@@ -14,9 +14,11 @@
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
 body{
   font-family:'OmegaUI',-apple-system,BlinkMacSystemFont,sans-serif;
-  min-height:100vh;color:#fff;background:#1a7fd4;
+  height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  color:#fff;background:#1a7fd4;
 }
 
 .bg{
@@ -25,13 +27,13 @@ body{
   background-size:cover;background-position:center top;background-repeat:no-repeat;
 }
 
-.screen{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1}
+.screen{display:none;min-height:100%;flex-direction:column;position:relative;z-index:1}
 .screen.active{display:flex}
 
 /* LOGO */
 .logo-wrap{display:flex;justify-content:center;padding:44px 0 0}
 .logo-para{width:36px;height:20px;background:#fff;clip-path:polygon(15% 0%,100% 0%,85% 100%,0% 100%)}
-.footer{text-align:center;font-size:12px;line-height:1.5;opacity:.55;padding:0 24px 36px;margin-top:auto}
+.footer{text-align:center;font-size:12px;line-height:1.5;opacity:.55;padding:0 24px env(safe-area-inset-bottom, 20px);padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 20px);margin-top:auto}
 
 /* ══ LOGIN ══ */
 .login-mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px 24px 16px}
@@ -56,30 +58,33 @@ body{
 .admin-row{text-align:center;padding:14px 0 6px}
 .admin-link{font-size:12px;opacity:.4;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 
-/* ══ SPIN — полностью белый экран ══ */
-#screen-spin{background:#fff}
+/* ══ SPIN ══ */
+#screen-spin{
+  background-image:url("assets/fon2.png");
+  background-size:cover;background-position:center top;background-repeat:no-repeat;
+}
 
 .reel-section{
-  flex:1;position:relative;background:#fff;overflow:hidden;min-height:300px;
+  flex:1;position:relative;background:transparent;overflow:hidden;min-height:240px;
 }
 
 /* стрелки — SVG файлы из assets */
 .arr{position:absolute;top:50%;transform:translateY(-50%);z-index:20;pointer-events:none;line-height:0}
-.arr-l{left:-4px}
-.arr-r{right:-4px}
+.arr-l{left:10px}
+.arr-r{right:10px}
 .arr img{width:54px;height:59px;display:block}
 
 /* фэйд сверху/снизу на белом */
-.reel-ft{position:absolute;top:0;left:0;right:0;height:120px;z-index:5;background:linear-gradient(to bottom,#fff 0%,rgba(255,255,255,0) 100%);pointer-events:none}
-.reel-fb{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:5;background:linear-gradient(to top,#fff 0%,rgba(255,255,255,0) 100%);pointer-events:none}
+.reel-ft{position:absolute;top:0;left:0;right:0;height:120px;z-index:5;background:linear-gradient(to bottom,rgba(255,255,255,.7) 0%,transparent 100%);pointer-events:none}
+.reel-fb{position:absolute;bottom:0;left:0;right:0;height:120px;z-index:5;background:linear-gradient(to top,rgba(255,255,255,.7) 0%,transparent 100%);pointer-events:none}
 
 .reel-inner{position:absolute;inset:0;display:flex;justify-content:center;overflow:hidden}
 .reel-track{display:flex;flex-direction:column;align-items:center;will-change:transform}
-.reel-item{width:100vw;max-width:480px;height:260px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 70px}
-.reel-item img{max-width:100%;max-height:240px;object-fit:contain;mix-blend-mode:multiply}
+.reel-item{width:100vw;max-width:480px;height:240px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 80px}
+.reel-item img{max-width:100%;max-height:220px;object-fit:contain;mix-blend-mode:multiply}
 
-/* нижняя панель — белая */
-.spin-bottom{padding:14px 24px 36px;background:#fff}
+/* нижняя панель — прозрачная */
+.spin-bottom{padding:14px 24px calc(env(safe-area-inset-bottom, 0px) + 20px);background:transparent}
 
 /* кнопка — plashka.svg как фон */
 .spin-btn-wrap{position:relative;width:100%;height:54px;margin-bottom:14px}
@@ -106,7 +111,7 @@ body{
   font-size:13px;color:#1a1a2e;flex-wrap:wrap;
 }
 .won-sep{width:6px;height:6px;border-radius:50%;background:#24A0F2;flex-shrink:0}
-.info-row{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:#999}
+.info-row{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:rgba(0,0,0,.45)}
 
 /* ══ DONE ══ */
 .done-mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px 24px;text-align:center}
@@ -187,7 +192,7 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
 </div>
 
 <!-- DONE -->
-<div id="screen-done" class="screen">
+<div id="screen-done" class="screen" style="background-image:url('assets/fon3.png');background-size:cover;background-position:center top;background-repeat:no-repeat">
   <div class="logo-wrap"><div class="logo-para"></div></div>
   <div class="done-mid">
     <div class="done-big">Ура!</div>
@@ -230,7 +235,7 @@ const MERCH=[
   {name:"Футболка",      img:"assets/tshirt.png"},
   {name:"Блокнот",       img:"assets/copybook.png"},
 ];
-const MAX=2, ITEM_H=260;
+const MAX=2, ITEM_H=240;
 let user=null,spinning=false,won=[],used=0;
 
 async function sbCheck(n,s){
