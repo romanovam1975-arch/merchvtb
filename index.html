@@ -139,6 +139,19 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
 
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(10,25,70,.85);color:#fff;padding:13px 24px;border-radius:100px;font-size:14px;z-index:999;opacity:0;transition:opacity .22s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
+
+/* ══ STAR BURST ══ */
+.star-particle{
+  position:fixed;width:28px;height:28px;
+  background-image:url("assets/starr.png");
+  background-size:contain;background-repeat:no-repeat;
+  pointer-events:none;z-index:9999;
+  animation:starFly .7s ease-out forwards;
+}
+@keyframes starFly{
+  0%  {transform:translate(0,0) scale(1) rotate(0deg);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(.3) rotate(var(--rot));opacity:0}
+}
 </style>
 </head>
 <body>
@@ -315,8 +328,30 @@ function initSpin(){
   document.getElementById("btn-spin").disabled=false;setLabel("крутить!");
 }
 
+function burstStars(btn){
+  const r=btn.getBoundingClientRect();
+  const cx=r.left+r.width/2, cy=r.top+r.height/2;
+  const count=10;
+  for(let i=0;i<count;i++){
+    const el=document.createElement("div");
+    el.className="star-particle";
+    const angle=(360/count)*i+Math.random()*20-10;
+    const dist=80+Math.random()*60;
+    const rad=angle*Math.PI/180;
+    el.style.left=(cx-14)+"px";
+    el.style.top=(cy-14)+"px";
+    el.style.setProperty("--dx",(Math.cos(rad)*dist)+"px");
+    el.style.setProperty("--dy",(Math.sin(rad)*dist)+"px");
+    el.style.setProperty("--rot",(Math.random()*360)+"deg");
+    el.style.animationDelay=(Math.random()*0.1)+"s";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),900);
+  }
+}
+
 function doSpin() {
   if (spinning || used >= MAX) return;
+  burstStars(document.getElementById("btn-spin"));
   spinning = true;
   document.getElementById("btn-spin").disabled = true;
 
