@@ -146,12 +146,12 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
   background-image:url("assets/starr.png");
   background-size:contain;background-repeat:no-repeat;
   pointer-events:none;z-index:9999;
-  animation:starFly 1.1s ease-in forwards;
+  animation:starFly 1.4s cubic-bezier(.25,.46,.45,.94) forwards;
 }
 @keyframes starFly{
-  0%  {transform:translate(0,0) scale(1) rotate(0deg);opacity:1}
-  60% {opacity:1}
-  100%{transform:translate(var(--dx),var(--dy)) scale(.6) rotate(var(--rot));opacity:0}
+  0%  {transform:translate(0,0) rotate(0deg);opacity:1}
+  40% {transform:translate(var(--dx),var(--peak)) rotate(var(--rot-mid));opacity:1}
+  100%{transform:translate(var(--dx-end),var(--dy)) rotate(var(--rot));opacity:0}
 }
 </style>
 </head>
@@ -336,19 +336,21 @@ function burstStars(btn){
   for(let i=0;i<count;i++){
     const el=document.createElement("div");
     el.className="star-particle";
-    const angle=-120+Math.random()*60+(i*(240/(count-1)));
-    const dist=120+Math.random()*80;
-    const rad=angle*Math.PI/180;
-    const screenH=window.innerHeight;
-    const fallExtra=screenH-(cy+dist*Math.sin(rad));
+    const spreadX=(i-(count-1)/2)*(60+Math.random()*20);
+    const peakY=-(160+Math.random()*80);
+    const fallY=window.innerHeight-cy+60;
+    const driftX=spreadX+(Math.random()*40-20);
     el.style.left=(cx-28)+"px";
     el.style.top=(cy-28)+"px";
-    el.style.setProperty("--dx",(Math.cos(rad)*dist)+"px");
-    el.style.setProperty("--dy",(dist*Math.sin(rad)+fallExtra+80)+"px");
+    el.style.setProperty("--dx",spreadX+"px");
+    el.style.setProperty("--peak",peakY+"px");
+    el.style.setProperty("--dx-end",driftX+"px");
+    el.style.setProperty("--dy",fallY+"px");
+    el.style.setProperty("--rot-mid",(Math.random()*180-90)+"deg");
     el.style.setProperty("--rot",(Math.random()*540-270)+"deg");
-    el.style.animationDelay=(i*0.06)+"s";
+    el.style.animationDelay=(i*0.05)+"s";
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1300);
+    setTimeout(()=>el.remove(),1600);
   }
 }
 
