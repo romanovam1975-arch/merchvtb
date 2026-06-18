@@ -146,11 +146,13 @@ td{padding:9px 12px;border-top:1px solid rgba(255,255,255,.08);color:rgba(255,25
   background-image:url("assets/starr.png");
   background-size:contain;background-repeat:no-repeat;
   pointer-events:none;z-index:9999;
-  animation:starFly 1.4s cubic-bezier(.25,.46,.45,.94) forwards;
+  animation:starFly 1.5s linear forwards;
 }
 @keyframes starFly{
-  0%  {transform:translate(0,0) rotate(0deg);opacity:1}
-  40% {transform:translate(var(--dx),var(--peak)) rotate(var(--rot-mid));opacity:1}
+  0%  {transform:translate(0,0) rotate(0deg);opacity:1;
+       animation-timing-function:cubic-bezier(0.215,0.61,0.355,1)}
+  42% {transform:translate(var(--dx),var(--peak)) rotate(var(--rot-mid));opacity:1;
+       animation-timing-function:cubic-bezier(0.55,0.055,0.675,0.19)}
   100%{transform:translate(var(--dx-end),var(--dy)) rotate(var(--rot));opacity:0}
 }
 </style>
@@ -336,21 +338,20 @@ function burstStars(btn){
   for(let i=0;i<count;i++){
     const el=document.createElement("div");
     el.className="star-particle";
-    const spreadX=(i-(count-1)/2)*(60+Math.random()*20);
-    const peakY=-(160+Math.random()*80);
-    const fallY=window.innerHeight-cy+60;
-    const driftX=spreadX+(Math.random()*40-20);
+    const spreadX=(i-(count-1)/2)*(56+Math.random()*16);
+    const peakY=-(200+Math.random()*60);
+    const fallY=window.innerHeight-cy+80;
     el.style.left=(cx-28)+"px";
     el.style.top=(cy-28)+"px";
     el.style.setProperty("--dx",spreadX+"px");
     el.style.setProperty("--peak",peakY+"px");
-    el.style.setProperty("--dx-end",driftX+"px");
+    el.style.setProperty("--dx-end",spreadX+"px");
     el.style.setProperty("--dy",fallY+"px");
-    el.style.setProperty("--rot-mid",(Math.random()*180-90)+"deg");
-    el.style.setProperty("--rot",(Math.random()*540-270)+"deg");
-    el.style.animationDelay=(i*0.05)+"s";
+    el.style.setProperty("--rot-mid",(Math.random()*120-60)+"deg");
+    el.style.setProperty("--rot",(Math.random()*360-180)+"deg");
+    el.style.animationDelay=(i*0.04)+"s";
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1600);
+    setTimeout(()=>el.remove(),1700);
   }
 }
 
